@@ -2,7 +2,6 @@ import gettext
 
 from constants import DOMAINS, LOCALE_DIR
 
-# --- 模块级变量 ---
 _translators = {}
 
 
@@ -13,7 +12,6 @@ def setup_translations(language: str):
     """
     global _translators
     _translators = {}
-    print(f"Loading all translations for language '{language}'...")
 
     for domain in DOMAINS:
         try:
@@ -25,11 +23,9 @@ def setup_translations(language: str):
             )
             # 存储该翻译器的 gettext 方法
             _translators[domain] = translator.gettext
-            print(f"✅ Translation for domain '{domain}' loaded.")
         except FileNotFoundError:
             # 如果某个域的翻译文件不存在，我们存储一个“空”翻译函数
             _translators[domain] = lambda msg: msg
-            print(f"⚠️ Warning: Translation file for domain '{domain}' not found. It will use original text.")
 
 
 class _Translator:

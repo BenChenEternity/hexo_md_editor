@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 
-from constants import languages
+from constants import LANGUAGES
 from src.core.event_bus import Consumer
-from . import _
+
 from ..constants import EVENT_LANGUAGE_CHANGED
+from . import _
 
 
 class SettingsView(tk.Toplevel, Consumer):
@@ -41,7 +42,7 @@ class SettingsView(tk.Toplevel, Consumer):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def bind_callback(self, controller):
-        self.lang_combo.bind('<<ComboboxSelected>>', controller.on_toggle_language)
+        self.lang_combo.bind("<<ComboboxSelected>>", controller.on_toggle_language)
         self.ok_button.config(command=self.on_close)
 
     def update_ui_texts(self):
@@ -81,38 +82,38 @@ class SettingsView(tk.Toplevel, Consumer):
         height = self.winfo_height()
         x = parent_x + (parent_width // 2) - (width // 2)
         y = parent_y + (parent_height // 2) - (height // 2)
-        self.geometry(f'{width}x{height}+{x}+{y}')
+        self.geometry(f"{width}x{height}+{x}+{y}")
 
     def _create_widgets(self):
         """创建窗口中的所有UI组件。"""
         main_frame = ttk.Frame(self, padding=20)
-        main_frame.pack(fill='both', expand=True)
+        main_frame.pack(fill="both", expand=True)
 
         # --- 国际化/语言设置 ---
         self.lang_frame = ttk.LabelFrame(main_frame, text=_("Language Settings"), padding=10)
-        self.lang_frame.pack(fill='x')
+        self.lang_frame.pack(fill="x")
 
         self.lang_frame.grid_columnconfigure(0, minsize=120)
         self.lang_frame.grid_columnconfigure(1, weight=1)
 
         self.lang_label = ttk.Label(self.lang_frame, text=_("Language") + ":")
-        self.lang_label.grid(row=0, column=0, sticky='w', padx=(0, 10))
+        self.lang_label.grid(row=0, column=0, sticky="w", padx=(0, 10))
 
-        lan_id = languages.get(self.model.get_current_language(), "en")
+        lan_id = LANGUAGES.get(self.model.get_current_language(), "en")
         self.lang_var = tk.StringVar(value=lan_id)
         self.lang_combo = ttk.Combobox(
             self.lang_frame,
             textvariable=self.lang_var,
-            values=list(languages.values()),
-            state='readonly',
-            justify='center'
+            values=list(LANGUAGES.values()),
+            state="readonly",
+            justify="center",
         )
         # Place the combobox in column 1 and make it fill the available space
-        self.lang_combo.grid(row=0, column=1, sticky='we')
+        self.lang_combo.grid(row=0, column=1, sticky="we")
 
         # --- 底部按钮 ---
         button_frame = ttk.Frame(main_frame, padding=(0, 20, 0, 0))
-        button_frame.pack(fill='x', side='bottom')
+        button_frame.pack(fill="x", side="bottom")
 
         self.ok_button = ttk.Button(button_frame, text=_("close"), command=self.destroy)
-        self.ok_button.pack(side='right')
+        self.ok_button.pack(side="right")
