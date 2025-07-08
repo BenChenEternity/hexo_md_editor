@@ -4,19 +4,17 @@ from i18n import setup_translations
 from src.app.controller import MainController
 from src.app.model import MainModel
 from src.app.view import MainView
+from src.services.persistence import PersistenceService
 
 
 class Application:
-    """
-    应用程序的主类。
-    负责创建和协调MVC组件：Model, View, Controller。
-    这是应用程序的“组合根 (Composition Root)”。
-    """
-
     def __init__(self):
         """
         初始化应用程序。
         """
+        # 启动后台持久化服务
+        self.persistence_service = PersistenceService()
+
         # M
         self.model = MainModel()
 
@@ -33,12 +31,12 @@ class Application:
 
         # C
         self.controller = MainController(self.model, self.view)
+        self.controller.load_config()
 
-        # 6. 将控制器设置给视图
+        # 将控制器设置给视图
         # 视图现在可以将其UI组件的事件 (如按钮点击) 绑定到控制器的方法上
         self.view.bind_callback(self.controller)
 
-        # 7. 设置窗口标题
         # 在所有组件都初始化后，设置窗口的最终标题
         self.controller.on_ui_ready()
         self.root.title(self.controller.get_app_name())
@@ -48,3 +46,5 @@ class Application:
         启动应用程序的主事件循环。
         """
         self.root.mainloop()
+        # 关闭持久化服务
+        self.persistence_service.close()

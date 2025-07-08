@@ -4,10 +4,18 @@ from pathlib import Path
 from PIL import Image
 
 from constants import ASSETS_PATH
-from src.core.resource import Resource
 
 
-class AssetsResource(Resource):
+class ResourceLoader:
+    def __init__(self, resource_path: Path):
+        self.path = resource_path
+
+    @abstractmethod
+    def load(self, name):
+        pass
+
+
+class AssetsResourceLoader(ResourceLoader):
     def __init__(self):
         super().__init__(ASSETS_PATH)
 
@@ -16,7 +24,7 @@ class AssetsResource(Resource):
         pass
 
 
-class IconResource(AssetsResource):
+class IconResourceLoader(AssetsResourceLoader):
 
     def load(self, name):
         icon_path = self.path / "icons" / name
@@ -25,3 +33,6 @@ class IconResource(AssetsResource):
             icon.load()
             return icon
         # 图标找不到直接异常停止
+
+
+icon_loader = IconResourceLoader()

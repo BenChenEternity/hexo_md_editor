@@ -6,7 +6,7 @@ from PIL import ImageTk, Image
 from src.core.event_bus import Consumer
 from src.app.resources import icon_settings, icon_info
 from . import _
-from .events import EVENT_LANGUAGE_CHANGED
+from .constants import EVENT_LANGUAGE_CHANGED
 
 
 class MainView(ttk.Frame, Consumer):

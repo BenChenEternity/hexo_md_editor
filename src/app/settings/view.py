@@ -4,7 +4,7 @@ from tkinter import ttk
 from constants import languages
 from src.core.event_bus import Consumer
 from . import _
-from ..events import EVENT_LANGUAGE_CHANGED
+from ..constants import EVENT_LANGUAGE_CHANGED
 
 
 class SettingsView(tk.Toplevel, Consumer):

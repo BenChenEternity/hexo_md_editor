@@ -1,4 +1,4 @@
-from src.app.events import EVENT_LANGUAGE_CHANGED
+from src.app.constants import EVENT_LANGUAGE_CHANGED
 from src.core.event_bus import Producer
 
 

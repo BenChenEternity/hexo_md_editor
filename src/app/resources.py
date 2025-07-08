@@ -1,6 +1,4 @@
-from src.resources import IconResource
-
-icon_loader = IconResource()
+from src.services.resource import icon_loader
 
 # 图标资源
 icon_settings = icon_loader.load("settings.png")
