@@ -1,0 +1,5 @@
+pillow~=11.3.0
+pytest~=8.4.1
+requests~=2.32.4
+polib~=1.2.0
+googletrans~=4.0.2
