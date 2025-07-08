@@ -1,26 +1,15 @@
-from constants import DEFAULT_SETTINGS, SETTINGS_FILE_PATH
+from i18n import setup_translations
+
 from .model import MainModel
 from .settings.controller import SettingsController
 from .settings.view import SettingsView
 from .view import MainView
-from i18n import setup_translations
-from ..core.settings_manager import settings_manager
 
 
 class MainController:
     def __init__(self, model: MainModel, view: MainView):
         self.model = model
         self.view = view
-
-    def load_config(self):
-        settings_manager.set_settings_path(SETTINGS_FILE_PATH)
-        config = settings_manager.load_settings()
-        if not config:
-            config = DEFAULT_SETTINGS
-            settings_manager.save_settings(config)
-
-        language = config.get("language")
-        self.model.set_current_language(language)
 
     def get_app_name(self) -> str:
         """从模型获取应用名称，提供给视图。"""
@@ -31,6 +20,9 @@ class MainController:
         封装了改变整个应用语言的完整流程。
         这是一个高级别的业务方法。
         """
+        if new_lang_code == self.model.get_current_language():
+            return
+
         setup_translations(new_lang_code)
         self.model.set_current_language(new_lang_code)
 

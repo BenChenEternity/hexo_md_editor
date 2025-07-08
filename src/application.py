@@ -1,5 +1,6 @@
 import tkinter as tk
 
+from constants import APP_NAME, LANGUAGE
 from i18n import setup_translations
 from src.app.controller import MainController
 from src.app.model import MainModel
@@ -12,11 +13,14 @@ class Application:
         """
         初始化应用程序。
         """
+
+        # M 初始化
+        self.model = MainModel()
+        self.model.set_current_language(LANGUAGE)
+        self.model.set_app_name(APP_NAME)
+
         # 启动后台持久化服务
         self.persistence_service = PersistenceService()
-
-        # M
-        self.model = MainModel()
 
         # i18n
         # 在创建任何UI组件之前，必须先设置好翻译
@@ -31,7 +35,6 @@ class Application:
 
         # C
         self.controller = MainController(self.model, self.view)
-        self.controller.load_config()
 
         # 将控制器设置给视图
         # 视图现在可以将其UI组件的事件 (如按钮点击) 绑定到控制器的方法上

@@ -1,11 +1,9 @@
 import gettext
-from pathlib import Path
+
+from constants import DOMAINS, LOCALE_DIR
 
 # --- 模块级变量 ---
 _translators = {}
-BASE_DIR = Path(__file__).parent.resolve()
-LOCALE_DIR = BASE_DIR / 'locale'
-DOMAINS = ['_', 'settings', 'content', 'file', 'deploy']  # "_" 代表直属目录下的文件
 
 
 def setup_translations(language: str):
@@ -39,6 +37,7 @@ class _Translator:
     一个可调用的类，用于在运行时动态地获取正确的翻译函数。
     这避免了在模块加载时静态绑定一个固定的翻译函数。
     """
+
     def __init__(self, domain: str):
         self.domain = domain
 

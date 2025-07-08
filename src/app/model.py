@@ -14,8 +14,8 @@ class MainModel(Producer):
         初始化模型的所有属性。
         """
         super().__init__()
-        self.app_name = "Hexo Helper"
-        self.current_language = 'en'
+        self.app_name = ""
+        self.current_language = "en"
         self.command_output = ""
 
     def get_current_language(self):
@@ -28,3 +28,6 @@ class MainModel(Producer):
 
     def get_app_name(self):
         return self.app_name
+
+    def set_app_name(self, app_name):
+        self.app_name = app_name

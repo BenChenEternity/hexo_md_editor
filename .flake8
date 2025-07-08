@@ -1,0 +1,12 @@
+[flake8]
+ignore = F405, W503, E203
+exclude =
+    *.pyc,
+    .git,
+    __pycache__,
+max-line-length=120
+max-complexity=26
+format=pylint
+show_source=False
+statistics=True
+count=True

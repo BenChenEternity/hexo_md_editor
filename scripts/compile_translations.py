@@ -1,4 +1,5 @@
 import pathlib
+
 import polib
 
 
@@ -8,10 +9,9 @@ def compile_translations():
     """
     # 获取脚本所在的目录，并推导出项目根目录和 locale 目录
     script_path = pathlib.Path(__file__).resolve()
-    # 项目根目录 (hexo_helper)
     base_dir = script_path.parent.parent
     # locale 目录
-    locale_dir = base_dir / 'locale'
+    locale_dir = base_dir / "locale"
 
     print(f"Searching for .po files in: {locale_dir}")
 
@@ -26,11 +26,11 @@ def compile_translations():
     # 遍历所有找到的 .po 文件
     for po_path in po_files:
         # 将文件扩展名从 .po 替换为 .mo，生成输出路径
-        mo_path = po_path.with_suffix('.mo')
+        mo_path = po_path.with_suffix(".mo")
 
         try:
             # 使用 polib 加载 .po 文件
-            po_file = polib.pofile(str(po_path), encoding='utf-8')
+            po_file = polib.pofile(str(po_path), encoding="utf-8")
             # 将其另存为 .mo 文件
             po_file.save_as_mofile(str(mo_path))
             print(f"✅ Compiled: {po_path.relative_to(base_dir)} -> {mo_path.relative_to(base_dir)}")
