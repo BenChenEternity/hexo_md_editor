@@ -14,9 +14,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
-msgid "Error: No such language"
-msgstr "Error: No such language"
-
 msgid "Settings"
 msgstr "Settings"
 
@@ -28,3 +25,12 @@ msgstr "Language"
 
 msgid "close"
 msgstr "close"
+
+msgid "Defaulting to"
+msgstr "Defaulting to"
+
+msgid "Error: No such language. Invalid value received:"
+msgstr "Error: No such language. Invalid value received:"
+
+#~ msgid "Error: No such language"
+#~ msgstr "Error: No such language"

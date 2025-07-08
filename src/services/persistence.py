@@ -1,6 +1,6 @@
 from src.app.constants import EVENT_LANGUAGE_CHANGED
+from src.core.mvc_template.event_bus import Consumer
 from src.core.settings_manager import settings_manager
-from src.core.event_bus import Consumer
 
 
 class PersistenceService(Consumer):
@@ -15,14 +15,7 @@ class PersistenceService(Consumer):
         self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
 
     def on_language_changed(self, new_lang: str):
-        """
-        当语言设置发生变化时，此方法被调用。
-        """
-        print(f"Language changed to '{new_lang}', saving setting...")
-        settings_manager.update_setting('language', new_lang)
+        settings_manager.update_setting("language", new_lang)
 
     def close(self):
-        """
-        在应用关闭时，取消所有订阅。
-        """
         self.unsubscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
