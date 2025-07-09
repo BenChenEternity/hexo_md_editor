@@ -1,8 +1,9 @@
+from tkinter import filedialog
+
 from i18n import setup_translations
 
 from .model import MainModel
-from .settings.controller import SettingsController
-from .settings.view import SettingsView
+from .settings.app import SettingsApp
 from .view import MainView
 
 
@@ -31,11 +32,22 @@ class MainController:
         处理设置按钮的点击事件。
         这个方法会创建并运行 SettingsController。
         """
-        # V
-        settings_view = SettingsView(self.view, self.model)
-        # C
-        settings_controller = SettingsController(self, settings_view, self.model)
-        settings_view.bind_callback(settings_controller)
+        settings_app = SettingsApp(self.view, self)
+        # 共享 model 传进去
+        settings_app.set_model(self.model)
+        settings_app.run()
+
+    def close_project(self, path: str):
+        """处理关闭项目标签页的请求。"""
+        self.model.remove_project(path)
+
+    def on_open_project(self):
+        path = filedialog.askdirectory()
+
+        # 检查用户是否选择了路径，而不是取消
+        if path:
+            # 指示模型添加这个新项目
+            self.model.add_project(path)
 
     def on_ui_ready(self):
         """

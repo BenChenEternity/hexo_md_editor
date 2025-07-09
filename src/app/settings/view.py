@@ -2,95 +2,57 @@ import tkinter as tk
 from tkinter import ttk
 
 from constants import LANGUAGES
-from src.core.event_bus import Consumer
+from src.core.mvc_template.event_bus import Consumer
 
 from ..constants import EVENT_LANGUAGE_CHANGED
 from . import _
 
 
-class SettingsView(tk.Toplevel, Consumer):
+class SettingsView(ttk.Frame, Consumer):
     """
-    设置窗口 (View)。
-    负责显示和布局所有 UI 组件，并将用户操作传递给其控制器。
+    设置视图 (View 组件)。
+    这是一个可复用的 UI 组件，负责创建设置相关的控件。
+    它继承自 ttk.Frame，并可以被放置在任何容器中（如 Toplevel 或其他 Frame）。
     """
 
-    def __init__(self, parent, model):
-        tk.Toplevel.__init__(self, parent)
+    def __init__(self, master, model):
+        # 初始化 Frame 自身
+        ttk.Frame.__init__(self, master, padding=20)
+
+        # 初始化事件消费者
         Consumer.__init__(self)
-        self.transient(parent)  # 保持在主窗口之上
-        self.title(_("Settings"))
-        self.model = model
-        self.parent = parent
 
-        # --- 窗口布局 ---
-        self.geometry("400x200")
-        self.resizable(False, False)
-        self.grab_set()  # 模态对话框，阻止与其他窗口交互
+        self.model = model
 
         # --- 创建控件 ---
         self._create_widgets()
 
-        # --- 窗口居中 ---
-        self._center_window()
-
         # --- 订阅事件 ---
-        # 语言变更
+        # 视图只订阅那些会改变其自身内容的事件。
         self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
 
-        # 事件取消
-
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
     def bind_callback(self, controller):
+        """将控件的动作绑定到控制器的方法。"""
         self.lang_combo.bind("<<ComboboxSelected>>", controller.on_toggle_language)
-        self.ok_button.config(command=self.on_close)
 
     def update_ui_texts(self):
-        self.title(_("Settings"))
+        """更新此框架内控件的文本，并返回新的窗口标题。"""
         self.lang_frame.config(text=_("Language Settings"))
         self.lang_label.config(text=_("Language") + ":")
-        self.ok_button.config(text=_("close"))
-
-    def on_close(self):
-        """
-        自定义的窗口关闭处理方法。
-        确保我们在销毁窗口前，先注销所有事件。
-        """
-        # 1. 先从事件总线注销自己
-        self.unsubscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
-        # 2. 再安全地销毁窗口
-        self.destroy()
+        # 返回新的标题文本，以便父窗口可以设置它
+        return _("Settings")
 
     def on_language_changed(self, **kwargs):
-        self.update_ui_texts()
-
-    def _center_window(self):
-        """将窗口居中于父窗口。"""
-        self.update_idletasks()
-        toplevel_parent = self.parent.winfo_toplevel()
-
-        # 结果 parent_x 是0，因为 parent 是铺满嵌套在另一个窗口里面的，要得到真正的父窗口
-        # parent_x = self.parent.winfo_x()
-        # parent_y = self.parent.winfo_y()
-        # parent_width = self.parent.winfo_width()
-        # parent_height = self.parent.winfo_height()
-        parent_x = toplevel_parent.winfo_x()
-        parent_y = toplevel_parent.winfo_y()
-        parent_width = toplevel_parent.winfo_width()
-        parent_height = toplevel_parent.winfo_height()
-        width = self.winfo_width()
-        height = self.winfo_height()
-        x = parent_x + (parent_width // 2) - (width // 2)
-        y = parent_y + (parent_height // 2) - (height // 2)
-        self.geometry(f"{width}x{height}+{x}+{y}")
+        """当语言更改时，用于更新UI文本的事件处理程序。"""
+        new_title = self.update_ui_texts()
+        # 视图更新自己的控件，而 App 层负责更新窗口标题。
+        # 此处直接更新顶层窗口标题作为一种简便实现。
+        self.winfo_toplevel().title(new_title)
 
     def _create_widgets(self):
-        """创建窗口中的所有UI组件。"""
-        main_frame = ttk.Frame(self, padding=20)
-        main_frame.pack(fill="both", expand=True)
-
+        """在此框架内创建所有的UI组件。"""
         # --- 国际化/语言设置 ---
-        self.lang_frame = ttk.LabelFrame(main_frame, text=_("Language Settings"), padding=10)
+        self.lang_frame = ttk.LabelFrame(self, text=_("Language Settings"), padding=10)
         self.lang_frame.pack(fill="x")
 
         self.lang_frame.grid_columnconfigure(0, minsize=120)
@@ -108,12 +70,11 @@ class SettingsView(tk.Toplevel, Consumer):
             state="readonly",
             justify="center",
         )
-        # Place the combobox in column 1 and make it fill the available space
         self.lang_combo.grid(row=0, column=1, sticky="we")
 
         # --- 底部按钮 ---
-        button_frame = ttk.Frame(main_frame, padding=(0, 20, 0, 0))
+        button_frame = ttk.Frame(self, padding=(0, 20, 0, 0))
         button_frame.pack(fill="x", side="bottom")
 
-        self.ok_button = ttk.Button(button_frame, text=_("close"), command=self.destroy)
-        self.ok_button.pack(side="right")
+    def on_close(self):
+        self.unsubscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)

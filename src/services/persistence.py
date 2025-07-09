@@ -1,5 +1,5 @@
 from src.app.constants import EVENT_LANGUAGE_CHANGED
-from src.core.event_bus import Consumer
+from src.core.mvc_template.event_bus import Consumer
 from src.core.settings_manager import settings_manager
 
 
