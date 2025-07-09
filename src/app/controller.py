@@ -1,77 +1,63 @@
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 from i18n import setup_translations
+from src.app.constants import (
+    EVENT_ERROR_OCCURRED,
+    EVENT_LANGUAGE_CHANGED,
+    MAIN_UI_DEPLOY_CLICKED,
+    MAIN_UI_GENERATE_CLICKED,
+    MAIN_UI_INFO_CLICKED,
+    MAIN_UI_OPEN_PROJECT_CLICKED,
+    MAIN_UI_SETTINGS_CLICKED,
+)
+from src.app.model import MainModel
+from src.app.module_manager import ModuleManager
+from src.core.mvc_template.controller import Controller as BaseController
 
-from .model import MainModel
-from .settings.app import SettingsApp
-from .view import MainView
 
+class MainController(BaseController):
+    """
+    主控制器，遵循 BaseController 模板。
+    """
 
-class MainController:
-    def __init__(self, model: MainModel, view: MainView):
-        self.model = model
-        self.view = view
+    def __init__(self, model: MainModel, module_manager: ModuleManager):
+        self.module_manager = module_manager
+        # 调用父类构造函数，它会自动调用 _setup_handlers
+        super().__init__(model)
 
-    def get_app_name(self) -> str:
-        """从模型获取应用名称，提供给视图。"""
-        return self.model.get_app_name()
+    def _setup_handlers(self):
+        """注册所有需要处理的事件。"""
+        # UI 事件
+        self.subscribe(MAIN_UI_SETTINGS_CLICKED, self.on_settings_click)
+        self.subscribe(MAIN_UI_INFO_CLICKED, self.on_info_click)
+        self.subscribe(MAIN_UI_OPEN_PROJECT_CLICKED, self.on_open_project)
+        self.subscribe(MAIN_UI_GENERATE_CLICKED, self.on_generate_click)
+        self.subscribe(MAIN_UI_DEPLOY_CLICKED, self.on_deploy_click)
 
-    def change_language(self, new_lang_code: str):
-        """
-        封装了改变整个应用语言的完整流程。
-        这是一个高级别的业务方法。
-        """
-        if new_lang_code == self.model.get_current_language():
-            return
-
-        setup_translations(new_lang_code)
-        self.model.set_current_language(new_lang_code)
+        # 全局/模型事件
+        self.subscribe(EVENT_ERROR_OCCURRED, self.on_error_occurred)
+        self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
 
     def on_settings_click(self):
-        """
-        处理设置按钮的点击事件。
-        这个方法会创建并运行 SettingsController。
-        """
-        settings_app = SettingsApp(self.view, self)
-        # 共享 model 传进去
-        settings_app.set_model(self.model)
-        settings_app.run()
-
-    def close_project(self, path: str):
-        """处理关闭项目标签页的请求。"""
-        self.model.remove_project(path)
+        self.module_manager.activate("settings")
 
     def on_open_project(self):
         path = filedialog.askdirectory()
-
-        # 检查用户是否选择了路径，而不是取消
         if path:
-            # 指示模型添加这个新项目
             self.model.add_project(path)
 
-    def on_ui_ready(self):
-        """
-        在UI准备就绪后调用。
-        负责从模型获取初始数据并填充到视图中。
-        """
-        # 1. 从 Model 获取数据
-        app_name = self.model.get_app_name()
-        # 2. 调用 View 的方法更新UI
-        self.view.set_app_title(app_name)
+    def on_error_occurred(self, title: str, message: str):
+        messagebox.showerror(title, message)
+
+    def on_language_changed(self, new_lang: str, **kwargs):
+        setup_translations(new_lang)
 
     def on_info_click(self):
-        pass
+        # 之后可以实现打开一个“关于”窗口
+        print("Info button clicked")
 
     def on_generate_click(self):
-        """处理“生成”按钮的点击事件。"""
-        pass
+        print("Generate button clicked")
 
     def on_deploy_click(self):
-        """处理“部署”按钮的点击事件。"""
-        pass
-
-    def _run_command_in_thread(self, command: list):
-        pass
-
-    def _execute_command(self, command: list):
-        pass
+        print("Deploy button clicked")

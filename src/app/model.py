@@ -1,30 +1,31 @@
 import logging
-from tkinter import messagebox
 
 from src.app.constants import (
+    EVENT_ERROR_OCCURRED,
     EVENT_LANGUAGE_CHANGED,
     EVENT_PROJECT_CLOSED,
     EVENT_PROJECT_OPENED,
 )
-from src.core.mvc_template.event_bus import Producer
+from src.core.mvc_template.model import Model as BaseModel
 
 from . import _
 
 logger = logging.getLogger(__name__)
 
 
-class MainModel(Producer):
+class MainModel(BaseModel):
     """
-    应用程序的数据模型。
-    这个类是所有应用状态的“单一数据源 (Single Source of Truth)”。
-    它不关心这些数据如何显示，只负责存储和管理。
+    应用程序的主数据模型。
+    遵循 BaseModel 模板。
     """
 
     def __init__(self):
-        """
-        初始化模型的所有属性。
-        """
         super().__init__()
+        # 调用模板定义的初始化方法
+        self.initialize()
+
+    def initialize(self):
+        """初始化模型的所有属性。"""
         self.app_name = ""
         self.current_language = "en"
         self.command_output = ""
@@ -45,23 +46,19 @@ class MainModel(Producer):
         self.app_name = app_name
 
     def add_project(self, path: str):
-        """添加一个新项目，如果它尚未打开，并发出事件。"""
         if path in self.open_projects:
-            # TODO 选择到已经打开的项目
             logger.info(f"Project: {path} already opened.")
             return
-
         self.open_projects.append(path)
         self.send_event(EVENT_PROJECT_OPENED, path=path)
 
     def remove_project(self, path: str):
-        """移除一个项目并发出事件。"""
         if path not in self.open_projects:
-            err_msg_title = _("error")
+            err_msg_title = _("Error")
             err_msg = f"{_('Project:')} {path} {_('not opened but closed.')}"
-            messagebox.showerror(err_msg_title, err_msg)
             logger.exception(err_msg)
+            # --- 核心更改: 不再调用messagebox，而是发送错误事件 ---
+            self.send_event(EVENT_ERROR_OCCURRED, title=err_msg_title, message=err_msg)
             return
-
         self.open_projects.remove(path)
         self.send_event(EVENT_PROJECT_CLOSED, path=path)

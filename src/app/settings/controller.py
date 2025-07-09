@@ -1,30 +1,24 @@
 import logging
 
-from constants import LANGUAGES
+from src.app.constants import SETTINGS_UI_LANGUAGE_SELECTED
+from src.app.model import MainModel
+from src.core.mvc_template.controller import Controller as BaseController
 
 logger = logging.getLogger(__name__)
 
 
-class SettingsController:
-    def __init__(self, main_controller, settings_view, main_model):
-        self.main_controller = main_controller
-        self.settings_view = settings_view
-        self.main_model = main_model
+class SettingsController(BaseController):
+    """
+    设置控制器。
+    完全遵循 BaseController 模板。
+    """
 
-    def on_toggle_language(self, event):
-        """
-        当用户在下拉框中选择了新的语言
-        """
-        selected_language_name = event.widget.get()
+    def __init__(self, model: MainModel):
+        super().__init__(model)
 
-        lang_map = {v: k for k, v in LANGUAGES.items()}
-        selected_language = lang_map.get(selected_language_name)
+    def _setup_handlers(self):
+        self.subscribe(SETTINGS_UI_LANGUAGE_SELECTED, self.on_language_selected)
 
-        if not selected_language:
-            # 将翻译后的信息和调试上下文一起记录到日志中
-            logger.error(
-                f"Error: No such language. Invalid value received: '{selected_language_name}'. Defaulting to 'en'."
-            )
-            selected_language = "en"
-
-        self.main_controller.change_language(selected_language)
+    def on_language_selected(self, lang_code: str):
+        if lang_code != self.model.get_current_language():
+            self.model.set_current_language(lang_code)
