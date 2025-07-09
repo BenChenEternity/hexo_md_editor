@@ -1,4 +1,5 @@
 from tkinter import filedialog, messagebox
+from typing import TYPE_CHECKING
 
 from i18n import setup_translations
 from src.app.constants import (
@@ -9,10 +10,13 @@ from src.app.constants import (
     MAIN_UI_INFO_CLICKED,
     MAIN_UI_OPEN_PROJECT_CLICKED,
     MAIN_UI_SETTINGS_CLICKED,
+    MODULE_ROOT_MAIN_SETTINGS,
 )
 from src.app.model import MainModel
-from src.app.module_manager import ModuleManager
 from src.core.mvc_template.controller import Controller as BaseController
+
+if TYPE_CHECKING:
+    from src.app.module_manager import ModuleManager
 
 
 class MainController(BaseController):
@@ -20,10 +24,10 @@ class MainController(BaseController):
     主控制器，遵循 BaseController 模板。
     """
 
-    def __init__(self, model: MainModel, module_manager: ModuleManager):
-        self.module_manager = module_manager
+    def __init__(self, model: MainModel, module_manager: "ModuleManager"):
         # 调用父类构造函数，它会自动调用 _setup_handlers
         super().__init__(model)
+        self.module_manager = module_manager
 
     def _setup_handlers(self):
         """注册所有需要处理的事件。"""
@@ -39,7 +43,7 @@ class MainController(BaseController):
         self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
 
     def on_settings_click(self):
-        self.module_manager.activate("settings")
+        self.module_manager.activate(MODULE_ROOT_MAIN_SETTINGS)
 
     def on_open_project(self):
         path = filedialog.askdirectory()

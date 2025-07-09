@@ -1,84 +1,158 @@
+import logging
 import tkinter as tk
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict, Optional
 
-from src.app.model import MainModel
+from ..core.tree import TreeNode
+from .constants import MODULE_ROOT, MODULE_ROOT_MAIN, MODULE_ROOT_MAIN_SETTINGS
+from .factory import MainFactory
+from .settings.factory import SettingsFactory
 
-from .settings import factory as settings_factory
+logger = logging.getLogger(__name__)
 
-# (未来可以导入更多模块的工厂)
-# from .project_manager import factory as pm_factory
+ModuleInstanceInfo = Dict[str, Any]
+ModuleNode = Dict[str, Any]  # e.g., {"instance": info, "children": {}}
 
 
 class ModuleManager:
     """
-    负责管理所有模块的创建、生命周期和呈现。
+    负责管理所有模块的创建、生命周期和呈现（以树状结构）。
+    这是应用的核心协调器。
     """
 
-    def __init__(self, root_window: tk.Tk, main_model: MainModel):
-        self.root_window = root_window
-        self.main_model = main_model
+    def __init__(self, root_window: tk.Tk):
+        self._module_factories: Dict[str, Callable] = {}
+        self._activate_tree = None
+        self._register_modules()
+        # 根节点
+        self._activate_tree = TreeNode(
+            MODULE_ROOT,
+            ModuleManager._create_node_data(None, root_window, None),
+        )
 
-        # 用于存储模块的工厂函数和呈现方式
-        self._modules: Dict[str, Dict[str, Any]] = {}
-        # 用于跟踪当前活动的模块实例，以便管理生命周期
-        self._active_instances: Dict[str, Tuple] = {}
+    @staticmethod
+    def _create_node_data(model, view, controller):
+        return {
+            "model": model,
+            "view": view,
+            "controller": controller,
+        }
 
-    def register_modules(self):
-        """集中注册所有已知的模块。"""
-        self.register("settings", settings_factory.create_module, presentation="window")
-        # self.register("project_manager", pm_factory.create_module, presentation="tab")
+    def get(self, name: str):
+        """
+        获取已经加载的模块 比如： MODULE_ROOT_MAIN_SETTINGS
+        """
+        node = self._activate_tree.get_child(name)
+        if node is None:
+            return None
+        return node.data
 
-    def register(self, name: str, factory: Callable, presentation: str):
-        self._modules[name] = {"factory": factory, "presentation": presentation}
+    def _register_modules(self):
+        """集中注册所有已知的模块及其工厂和呈现方式。"""
+        self.register(MODULE_ROOT_MAIN, MainFactory.create_module)
+        self.register(MODULE_ROOT_MAIN_SETTINGS, SettingsFactory.create_module)
+        # 示例：未来的 workspace 模块也将嵌入到父视图中
+        # self.register("workspace", workspace_factory.create_module, presentation="frame")
 
-    def activate(self, name: str):
-        """激活一个模块（按需加载）。"""
-        if name in self._active_instances:
-            # 如果模块已激活（例如，窗口已打开），则将其带到最前
-            instance_info = self._active_instances[name]
-            if "window" in instance_info:
-                instance_info["window"].deiconify()
-                instance_info["window"].lift()
+    def register(self, name: str, factory: Callable):
+        """
+        注册一个模块。
+        :param name: 模块的唯一名称。
+        :param factory: 创建模块MVC三元组的工厂函数。
+        """
+        self._module_factories[name] = factory
+
+    def activate(self, name: str) -> Optional[ModuleInstanceInfo]:
+        """
+        激活一个模块（按需加载）。
+        如果模块已激活，则将其带到最前。
+        :param name: 要激活的模块名。
+        :return: 成功激活后返回模块的实例信息字典，否则返回 None。
+        """
+        full_name = name
+        # 从root开始排除自身
+        name = name.split(".", 1)[1]
+
+        module = self._module_factories.get(full_name, None)
+        # 未注册
+        if module is None:
+            logger.exception(f"Module: '{full_name}' not registered")
             return
 
-        if name not in self._modules:
-            print(f"Error: Module '{name}' not registered.")
+        module_node: TreeNode = self._activate_tree.get_child(name)
+
+        # 已激活
+        if module_node is not None:
+            data = module_node.data
+            if not isinstance(data, dict):
+                logger.exception(f"Error module info type: {type(data)}")
+                return
+
+            # 如果是窗口，放最上面提醒
+            view = data.get("view", None)
+            if isinstance(view, tk.Toplevel):
+                view.deiconify()
+                view.lift()
             return
 
-        module_info = self._modules[name]
-        factory = module_info["factory"]
-        presentation = module_info["presentation"]
-
-        if presentation == "window":
-            self._activate_in_window(name, factory)
-        elif presentation == "tab":
-            # self._activate_in_tab(name, factory) # 未来可以实现
+        # 激活模块
+        module_node = self._activate_tree.add_child(name)
+        parent_module = module_node.parent
+        # 根组件
+        if not parent_module:
             pass
 
-    def _activate_in_window(self, name: str, factory: Callable):
-        """在新窗口中激活模块的通用逻辑。"""
-        window = tk.Toplevel(self.root_window)
+        context = {
+            **parent_module.data,
+            "module_manager": self,
+            "module_name": full_name,
+        }
 
-        # 调用工厂创建MVC实例，并将新窗口作为视图的父控件
-        model, view, controller = factory(window, self.main_model)
+        factory = self._module_factories[full_name]
+        model, view, controller = factory(context)
 
-        # 统一处理窗口关闭时的清理工作
-        def on_close():
-            view.cleanup()
-            controller.cleanup()
-            # 从活动实例中移除
-            del self._active_instances[name]
-            window.destroy()
+        # 添加到激活树
+        instance_info = ModuleManager._create_node_data(model, view, controller)
+        module_node.data = instance_info
 
-        window.protocol("WM_DELETE_WINDOW", on_close)
+        return instance_info
 
-        # 将实例信息保存起来
-        self._active_instances[name] = {"model": model, "view": view, "controller": controller, "window": window}
+    def deactivate(self, name: str):
+        """
+        停用并清理一个模块（包括其所有子模块），采用后序遍历。
+        :param name: 要停用的模块全名。
+        """
+        logger.info(f"Deactivating module: {name}")
+        relative_name = name.split(".", 1)[1]
 
-    def cleanup_all(self):
-        """在应用退出时，清理所有活动的模块实例。"""
-        # 遍历副本以安全地修改字典
-        for name, instance_info in list(self._active_instances.items()):
-            if "window" in instance_info:
-                # 调用 on_close 来执行完整的清理流程
-                instance_info["window"].destroy()
+        node_to_remove = self._activate_tree.get_child(relative_name)
+        if not node_to_remove:
+            logger.warning(f"Module {name} not found in activate tree. Cannot deactivate.")
+            return
+
+        def _post_order_cleanup(node: TreeNode):
+            for child in node.get_children().values():
+                _post_order_cleanup(child)
+
+            instance_info = node.data
+            if not instance_info:
+                return
+
+            controller = instance_info.get("controller")
+            view = instance_info.get("view")
+
+            if controller and hasattr(controller, "cleanup"):
+                controller.cleanup()
+
+            if view:
+                if hasattr(view, "cleanup"):
+                    view.cleanup()
+                for child in view.winfo_children():
+                    if hasattr(child, "cleanup"):
+                        child.cleanup()
+
+        # 开始后序遍历清理
+        _post_order_cleanup(node_to_remove)
+
+        # 移除节点
+        self._activate_tree.remove_child(relative_name)
+        logger.info(f"Module {name} and its children deactivated and cleaned up successfully.")

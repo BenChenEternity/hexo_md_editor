@@ -1,22 +1,50 @@
 import tkinter as tk
+from typing import TYPE_CHECKING
 
 from src.app.model import MainModel
 from src.app.settings.controller import SettingsController
 from src.app.settings.view import SettingsView
+from src.utils.ui import UI
+
+from . import _
+
+if TYPE_CHECKING:
+    from src.app.module_manager import ModuleManager
 
 
-def create_module(master: tk.Misc, main_model: MainModel):
-    """
-    设置模块的工厂函数。
-    负责创建并返回该模块的 MVC 实例。
-    :param master: 视图(View)将要依附的父控件。
-    :param main_model: 共享的主数据模型。
-    :return: (model, view, controller) 元组。
-    """
-    # 注意：这里的 model 是共享的 main_model，所以我们直接使用它。
-    # 控制器只需要模型。
-    controller = SettingsController(main_model)
-    # 视图需要父控件和模型。
-    view = SettingsView(master, main_model)
+class SettingsFactory:
+    @staticmethod
+    def create_module(context: dict):
+        """
+        组装 MVC
+        """
+        module_manager: "ModuleManager" = context["module_manager"]
+        parent_model: "MainModel" = context["model"]
+        parent_view: tk.Misc = context["view"]
+        module_name: str = context["module_name"]
 
-    return main_model, view, controller
+        # 创建一个新的Toplevel窗口来容纳设置视图
+        toplevel_window = tk.Toplevel(parent_view.winfo_toplevel())
+        toplevel_window.title(_("settings"))
+        toplevel_window.transient(parent_view.winfo_toplevel())
+        toplevel_window.grab_set()
+        toplevel_window.protocol(
+            "WM_DELETE_WINDOW", lambda: SettingsFactory.destroy_module(module_name, module_manager, toplevel_window)
+        )
+
+        controller = SettingsController(parent_model)
+        view = SettingsView(toplevel_window, parent_model)
+
+        # 将视图Frame放入Toplevel窗口中
+        view.pack(in_=toplevel_window, fill="both", expand=True)
+
+        # 居中显示新窗口
+        UI.center_window(toplevel_window, 400, 300)
+
+        # 返回MVC三元组，其中view现在已经被正确地展示在它自己的窗口里
+        return parent_model, view, controller
+
+    @staticmethod
+    def destroy_module(module_name: str, module_manager: "ModuleManager", window: tk.Misc):
+        module_manager.deactivate(module_name)
+        window.destroy()

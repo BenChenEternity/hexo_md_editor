@@ -1,8 +1,8 @@
 import logging
 
 from src.app.constants import SETTINGS_UI_LANGUAGE_SELECTED
-from src.app.model import MainModel
 from src.core.mvc_template.controller import Controller as BaseController
+from src.core.mvc_template.model import Model
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class SettingsController(BaseController):
     完全遵循 BaseController 模板。
     """
 
-    def __init__(self, model: MainModel):
+    def __init__(self, model: Model):
         super().__init__(model)
 
     def _setup_handlers(self):

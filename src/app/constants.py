@@ -13,3 +13,8 @@ MAIN_UI_INFO_CLICKED = "main.ui.info.clicked"
 MAIN_UI_GENERATE_CLICKED = "main.ui.generate.clicked"
 MAIN_UI_DEPLOY_CLICKED = "main.ui.deploy.clicked"
 MAIN_UI_OPEN_PROJECT_CLICKED = "main.ui.open_project.clicked"
+
+MODULE_ROOT = "root"
+MODULE_ROOT_MAIN = "root.main"
+MODULE_ROOT_MAIN_SETTINGS = "root.main.settings"
+MODULE_ROOT_MAIN_WORKSPACE = "root.workspace"

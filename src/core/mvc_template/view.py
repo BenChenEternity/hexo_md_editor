@@ -1,6 +1,6 @@
-import tkinter as tk
 from abc import ABC, abstractmethod
 from tkinter import ttk
+from typing import Any, Dict, Optional
 
 from src.core.mvc_template.event_bus import Consumer, Producer
 
@@ -15,18 +15,18 @@ class View(ttk.Frame, Consumer, Producer, ABC):
     - 继承 Producer，用于发送用户的UI操作事件。
     """
 
-    def __init__(self, master: tk.Misc, model: Model):
+    def __init__(self, master, model: Model):
         """
         构造函数。
-        :param master: 父Tkinter控件。
         :param model: 与此视图关联的模型实例。
         """
         # 依次安全地调用所有父类的构造函数
-        ttk.Frame.__init__(self, master)
+        ttk.Frame.__init__(self, master=master)
         Consumer.__init__(self)
         Producer.__init__(self)
 
         self.model = model
+        self.instance_info: Optional[Dict[str, Any]] = None
 
         # 定义一个标准化的UI创建流程
         self._create_widgets()

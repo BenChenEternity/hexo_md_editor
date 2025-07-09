@@ -3,9 +3,11 @@ from tkinter import scrolledtext, ttk
 
 from PIL import Image, ImageTk
 
+from constants import APP_NAME
 from src.app.resources import icon_info, icon_settings
 from src.core.mvc_template.view import View as BaseView
 
+from ..utils.ui import UI
 from . import _
 from .constants import (
     EVENT_LANGUAGE_CHANGED,
@@ -22,12 +24,12 @@ class MainView(BaseView):
     主视图，遵循 BaseView 模板。
     """
 
-    def __init__(self, parent: tk.Tk, model: MainModel):
-        super().__init__(parent, model)
+    def __init__(self, master, model: MainModel):
+        super().__init__(master, model)
 
     def _create_widgets(self):
         self.pack(fill="both", expand=True)
-        self._center_window(800, 600)
+        UI.center_window(self.winfo_toplevel(), 800, 600)
         self._load_icons()
 
         style = ttk.Style()
@@ -51,7 +53,7 @@ class MainView(BaseView):
         self._create_command_panel(main_content_frame)
 
         self.update_ui_texts()
-        self.title_label.config(text=self.model.get_app_name())
+        self.title_label.config(text=APP_NAME)
 
     def _setup_bindings(self):
         self.settings_button.config(command=lambda: self.send_event(MAIN_UI_SETTINGS_CLICKED))
@@ -94,14 +96,3 @@ class MainView(BaseView):
         self.deploy_button.pack(side="left")
         self.output_text = scrolledtext.ScrolledText(self.cmd_panel, height=15, wrap=tk.WORD, state="disabled")
         self.output_text.pack(fill="both", expand=True)
-
-    def _center_window(self, width, height):
-        """窗口居中显示"""
-        # --- 核心更改: 使用 winfo_toplevel() 代替 self.parent ---
-        toplevel = self.winfo_toplevel()
-        toplevel.update_idletasks()
-        screen_width = toplevel.winfo_screenwidth()
-        screen_height = toplevel.winfo_screenheight()
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-        toplevel.geometry(f"{width}x{height}+{x}+{y}")

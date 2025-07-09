@@ -15,7 +15,7 @@ class SettingsView(BaseView):
     完全遵循 BaseView 模板。
     """
 
-    def __init__(self, master: tk.Misc, model: BaseModel):
+    def __init__(self, master, model: BaseModel):
         super().__init__(master, model)
 
     def _create_widgets(self):

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
 
 from src.core.mvc_template.event_bus import Consumer
 
@@ -18,6 +19,7 @@ class Controller(Consumer, ABC):
         """
         super().__init__()
         self.model = model
+        self.instance_info: Optional[Dict[str, Any]] = None
         self._setup_handlers()
 
     @abstractmethod

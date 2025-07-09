@@ -21,11 +21,13 @@ class MainModel(BaseModel):
 
     def __init__(self):
         super().__init__()
-        # 调用模板定义的初始化方法
-        self.initialize()
+
+        self.app_name = None
+        self.current_language = None
+        self.command_output = None
+        self.open_projects = None
 
     def initialize(self):
-        """初始化模型的所有属性。"""
         self.app_name = ""
         self.current_language = "en"
         self.command_output = ""
@@ -57,7 +59,6 @@ class MainModel(BaseModel):
             err_msg_title = _("Error")
             err_msg = f"{_('Project:')} {path} {_('not opened but closed.')}"
             logger.exception(err_msg)
-            # --- 核心更改: 不再调用messagebox，而是发送错误事件 ---
             self.send_event(EVENT_ERROR_OCCURRED, title=err_msg_title, message=err_msg)
             return
         self.open_projects.remove(path)
