@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from constants import ASSETS_PATH
+from settings import ASSETS_PATH
 
 
 class ResourceLoader:

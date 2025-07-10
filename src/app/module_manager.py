@@ -68,6 +68,7 @@ class ModuleManager:
         :param name: 要激活的模块名。
         :return: 成功激活后返回模块的实例信息字典，否则返回 None。
         """
+        logger.debug(f"Activating: ({name}).")
         full_name = name
         # 从root开始排除自身
         name = name.split(".", 1)[1]
@@ -75,7 +76,7 @@ class ModuleManager:
         module = self._module_factories.get(full_name, None)
         # 未注册
         if module is None:
-            logger.exception(f"Module: '{full_name}' not registered")
+            logger.exception(f"Module: '{full_name}' not registered.")
             return
 
         module_node: TreeNode = self._activate_tree.get_child(name)
@@ -84,7 +85,7 @@ class ModuleManager:
         if module_node is not None:
             data = module_node.data
             if not isinstance(data, dict):
-                logger.exception(f"Error module info type: {type(data)}")
+                logger.exception(f"Error module info type: {type(data)}.")
                 return
 
             # 如果是窗口，放最上面提醒
@@ -114,6 +115,7 @@ class ModuleManager:
         instance_info = ModuleManager._create_node_data(model, view, controller)
         module_node.data = instance_info
 
+        logger.debug(f"[DONE] Activated: ({full_name}).")
         return instance_info
 
     def deactivate(self, name: str):
@@ -121,7 +123,7 @@ class ModuleManager:
         停用并清理一个模块（包括其所有子模块），采用后序遍历。
         :param name: 要停用的模块全名。
         """
-        logger.info(f"Deactivating module: {name}")
+        logger.debug(f"Deactivating: ({name}).")
         relative_name = name.split(".", 1)[1]
 
         node_to_remove = self._activate_tree.get_child(relative_name)
@@ -155,4 +157,4 @@ class ModuleManager:
 
         # 移除节点
         self._activate_tree.remove_child(relative_name)
-        logger.info(f"Module {name} and its children deactivated and cleaned up successfully.")
+        logger.debug(f"[DONE] Deactivated: ({name}).")

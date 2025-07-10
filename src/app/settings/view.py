@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from constants import LANGUAGES
+from settings import LANGUAGES
 from src.app.constants import EVENT_LANGUAGE_CHANGED, SETTINGS_UI_LANGUAGE_SELECTED
 from src.core.mvc_template.model import Model as BaseModel
 from src.core.mvc_template.view import View as BaseView

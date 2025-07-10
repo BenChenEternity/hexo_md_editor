@@ -3,7 +3,7 @@ from tkinter import scrolledtext, ttk
 
 from PIL import Image, ImageTk
 
-from constants import APP_NAME
+from settings import APP_NAME
 from src.app.resources import icon_info, icon_settings
 from src.core.mvc_template.view import View as BaseView
 

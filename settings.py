@@ -1,3 +1,4 @@
+import logging
 from collections import OrderedDict
 from pathlib import Path
 
@@ -33,3 +34,10 @@ LANGUAGES = OrderedDict(
         "zh-tw": "繁體中文",
     }
 )
+
+LOGGER_LEVEL = logging.INFO
+
+try:
+    from local_settings import *  # noqa
+except ImportError:
+    pass

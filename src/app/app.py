@@ -1,8 +1,8 @@
 import logging
 import tkinter as tk
 
-from constants import APP_NAME, LOG_FILE_PATH, SETTINGS_FILE_PATH
 from i18n import setup_translations
+from settings import APP_NAME, LOG_FILE_PATH, SETTINGS_FILE_PATH
 from src.app.constants import MODULE_ROOT_MAIN
 from src.app.module_manager import ModuleManager
 from src.core.logging_manager import LoggingManager

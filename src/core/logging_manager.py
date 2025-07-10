@@ -3,9 +3,13 @@ import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
+from settings import LOGGER_LEVEL
+
 
 class LoggingManager:
     def __init__(self, log_file_path: Path | None = None):
+        logging.basicConfig(level=LOGGER_LEVEL)
+
         self.log_file_path = log_file_path
         self.log_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         self.root_logger = logging.getLogger()
