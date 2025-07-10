@@ -17,7 +17,7 @@ class Application:
 
         self.root = tk.Tk()
         self.root.minsize(800, 600)
-        self.root.title(APP_NAME)  # 可以先设置一个默认标题
+        self.root.title(APP_NAME)
 
         # 注册
         self.module_manager = ModuleManager(self.root)
@@ -55,6 +55,8 @@ class Application:
         # 清理工作保持不变
         if self.persistence_service:
             self.persistence_service.unsubscribe_all()
-        # if module_manager:
-        #     module_manager.cleanup_all()
+
+        if self.module_manager:
+            self.module_manager.cleanup_all()
+
         logging.info("Application shutting down.")

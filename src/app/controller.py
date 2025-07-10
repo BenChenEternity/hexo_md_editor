@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING
 from i18n import setup_translations
 from src.app.constants import (
     EVENT_ERROR_OCCURRED,
-    EVENT_LANGUAGE_CHANGED,
-    MAIN_UI_DEPLOY_CLICKED,
-    MAIN_UI_GENERATE_CLICKED,
-    MAIN_UI_INFO_CLICKED,
-    MAIN_UI_OPEN_PROJECT_CLICKED,
-    MAIN_UI_SETTINGS_CLICKED,
+    EVENT_MAIN_MODEL_LANGUAGE_CHANGED,
+    EVENT_MAIN_UI_DEPLOY_CLICKED,
+    EVENT_MAIN_UI_GENERATE_CLICKED,
+    EVENT_MAIN_UI_INFO_CLICKED,
+    EVENT_MAIN_UI_OPEN_PROJECT_CLICKED,
+    EVENT_MAIN_UI_SETTINGS_CLICKED,
     MODULE_ROOT_MAIN_SETTINGS,
 )
 from src.app.model import MainModel
@@ -32,15 +32,15 @@ class MainController(BaseController):
     def _setup_handlers(self):
         """注册所有需要处理的事件。"""
         # UI 事件
-        self.subscribe(MAIN_UI_SETTINGS_CLICKED, self.on_settings_click)
-        self.subscribe(MAIN_UI_INFO_CLICKED, self.on_info_click)
-        self.subscribe(MAIN_UI_OPEN_PROJECT_CLICKED, self.on_open_project)
-        self.subscribe(MAIN_UI_GENERATE_CLICKED, self.on_generate_click)
-        self.subscribe(MAIN_UI_DEPLOY_CLICKED, self.on_deploy_click)
+        self.subscribe(EVENT_MAIN_UI_SETTINGS_CLICKED, self.on_settings_click)
+        self.subscribe(EVENT_MAIN_UI_INFO_CLICKED, self.on_info_click)
+        self.subscribe(EVENT_MAIN_UI_OPEN_PROJECT_CLICKED, self.on_open_project)
+        self.subscribe(EVENT_MAIN_UI_GENERATE_CLICKED, self.on_generate_click)
+        self.subscribe(EVENT_MAIN_UI_DEPLOY_CLICKED, self.on_deploy_click)
 
         # 全局/模型事件
         self.subscribe(EVENT_ERROR_OCCURRED, self.on_error_occurred)
-        self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
+        self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
 
     def on_settings_click(self):
         self.module_manager.activate(MODULE_ROOT_MAIN_SETTINGS)

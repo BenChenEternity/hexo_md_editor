@@ -2,9 +2,9 @@ import logging
 
 from src.app.constants import (
     EVENT_ERROR_OCCURRED,
-    EVENT_LANGUAGE_CHANGED,
-    EVENT_PROJECT_CLOSED,
-    EVENT_PROJECT_OPENED,
+    EVENT_MAIN_MODEL_LANGUAGE_CHANGED,
+    EVENT_MAIN_MODEL_PROJECT_CLOSED,
+    EVENT_MAIN_MODEL_PROJECT_OPENED,
 )
 from src.core.mvc_template.model import Model as BaseModel
 
@@ -39,7 +39,7 @@ class MainModel(BaseModel):
     def set_current_language(self, language_code):
         if self.current_language != language_code:
             self.current_language = language_code
-            self.send_event(EVENT_LANGUAGE_CHANGED, new_lang=language_code)
+            self.send_event(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, new_lang=language_code)
 
     def get_app_name(self):
         return self.app_name
@@ -52,7 +52,7 @@ class MainModel(BaseModel):
             logger.info(f"Project: {path} already opened.")
             return
         self.open_projects.append(path)
-        self.send_event(EVENT_PROJECT_OPENED, path=path)
+        self.send_event(EVENT_MAIN_MODEL_PROJECT_OPENED, path=path)
 
     def remove_project(self, path: str):
         if path not in self.open_projects:
@@ -62,4 +62,4 @@ class MainModel(BaseModel):
             self.send_event(EVENT_ERROR_OCCURRED, title=err_msg_title, message=err_msg)
             return
         self.open_projects.remove(path)
-        self.send_event(EVENT_PROJECT_CLOSED, path=path)
+        self.send_event(EVENT_MAIN_MODEL_PROJECT_CLOSED, path=path)

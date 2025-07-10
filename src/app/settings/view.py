@@ -2,7 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 
 from settings import LANGUAGES
-from src.app.constants import EVENT_LANGUAGE_CHANGED, SETTINGS_UI_LANGUAGE_SELECTED
+from src.app.constants import (
+    EVENT_MAIN_MODEL_LANGUAGE_CHANGED,
+    EVENT_MAIN_SETTINGS_UI_LANGUAGE_SELECTED,
+)
 from src.core.mvc_template.model import Model as BaseModel
 from src.core.mvc_template.view import View as BaseView
 
@@ -41,14 +44,14 @@ class SettingsView(BaseView):
         self.lang_combo.bind("<<ComboboxSelected>>", self._on_language_selected)
 
     def _setup_subscriptions(self):
-        self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
+        self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
 
     def _on_language_selected(self, event):
         selected_language_name = event.widget.get()
         lang_map = {v: k for k, v in LANGUAGES.items()}
         lang_code = lang_map.get(selected_language_name)
         if lang_code:
-            self.send_event(SETTINGS_UI_LANGUAGE_SELECTED, lang_code=lang_code)
+            self.send_event(EVENT_MAIN_SETTINGS_UI_LANGUAGE_SELECTED, lang_code=lang_code)
 
     def on_language_changed(self, **kwargs):
         new_title = self.update_ui_texts()

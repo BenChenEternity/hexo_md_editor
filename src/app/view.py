@@ -10,11 +10,11 @@ from src.core.mvc_template.view import View as BaseView
 from ..utils.ui import UI
 from . import _
 from .constants import (
-    EVENT_LANGUAGE_CHANGED,
-    MAIN_UI_DEPLOY_CLICKED,
-    MAIN_UI_GENERATE_CLICKED,
-    MAIN_UI_INFO_CLICKED,
-    MAIN_UI_SETTINGS_CLICKED,
+    EVENT_MAIN_MODEL_LANGUAGE_CHANGED,
+    EVENT_MAIN_UI_DEPLOY_CLICKED,
+    EVENT_MAIN_UI_GENERATE_CLICKED,
+    EVENT_MAIN_UI_INFO_CLICKED,
+    EVENT_MAIN_UI_SETTINGS_CLICKED,
 )
 from .model import MainModel
 
@@ -56,15 +56,15 @@ class MainView(BaseView):
         self.title_label.config(text=APP_NAME)
 
     def _setup_bindings(self):
-        self.settings_button.config(command=lambda: self.send_event(MAIN_UI_SETTINGS_CLICKED))
-        self.info_button.config(command=lambda: self.send_event(MAIN_UI_INFO_CLICKED))
-        self.generate_button.config(command=lambda: self.send_event(MAIN_UI_GENERATE_CLICKED))
-        self.deploy_button.config(command=lambda: self.send_event(MAIN_UI_DEPLOY_CLICKED))
+        self.settings_button.config(command=lambda: self.send_event(EVENT_MAIN_UI_SETTINGS_CLICKED))
+        self.info_button.config(command=lambda: self.send_event(EVENT_MAIN_UI_INFO_CLICKED))
+        self.generate_button.config(command=lambda: self.send_event(EVENT_MAIN_UI_GENERATE_CLICKED))
+        self.deploy_button.config(command=lambda: self.send_event(EVENT_MAIN_UI_DEPLOY_CLICKED))
         # 假设标题栏有一个“打开项目”的按钮，或者未来菜单项会发送这个事件
         # 这里我们暂时不创建这个按钮，但保留这个逻辑
 
     def _setup_subscriptions(self):
-        self.subscribe(EVENT_LANGUAGE_CHANGED, self.on_language_changed)
+        self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
 
     def on_language_changed(self, **kwargs):
         self.update_ui_texts()

@@ -124,9 +124,15 @@ class ModuleManager:
         :param name: 要停用的模块全名。
         """
         logger.debug(f"Deactivating: ({name}).")
-        relative_name = name.split(".", 1)[1]
+        relative_name = name.split(".", 1)
+        if len(relative_name) == 1:
+            # 根节点
+            relative_name = relative_name[0]
+            node_to_remove = self._activate_tree
+        else:
+            relative_name = relative_name[1]
+            node_to_remove = self._activate_tree.get_child(relative_name)
 
-        node_to_remove = self._activate_tree.get_child(relative_name)
         if not node_to_remove:
             logger.warning(f"Module {name} not found in activate tree. Cannot deactivate.")
             return
@@ -145,12 +151,10 @@ class ModuleManager:
             if controller and hasattr(controller, "cleanup"):
                 controller.cleanup()
 
-            if view:
-                if hasattr(view, "cleanup"):
-                    view.cleanup()
-                for child in view.winfo_children():
-                    if hasattr(child, "cleanup"):
-                        child.cleanup()
+            if view and hasattr(view, "cleanup"):
+                view.cleanup()
+
+            logger.debug(f"Deactivating now -> ({node.name}).")
 
         # 开始后序遍历清理
         _post_order_cleanup(node_to_remove)
@@ -158,3 +162,6 @@ class ModuleManager:
         # 移除节点
         self._activate_tree.remove_child(relative_name)
         logger.debug(f"[DONE] Deactivated: ({name}).")
+
+    def cleanup_all(self):
+        self.deactivate(MODULE_ROOT)
