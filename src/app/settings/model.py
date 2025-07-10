@@ -4,7 +4,8 @@ from typing import Any
 
 from src.app.constants import (
     EVENT_MAIN_SETTINGS_MODEL_APPLIED,
-    EVENT_MAIN_SETTINGS_MODEL_WORKING_STATE_CHANGED,
+    EVENT_MAIN_SETTINGS_MODEL_FIELD_DIRTY,
+    EVENT_MAIN_SETTINGS_MODEL_FIELD_DIRTY_CANCELLED,
 )
 from src.core.mvc_template.model import Model
 
@@ -38,11 +39,12 @@ class SettingsModel(Model):
         # 将新工作值与原始值比较，更新脏状态
         if self.working_settings[key] != self.original_settings[key]:
             self.dirty_fields.add(key)
+            # 更新UI脏*显示
+            self.send_event(EVENT_MAIN_SETTINGS_MODEL_FIELD_DIRTY, key=key)
         else:
             self.dirty_fields.discard(key)  # 如果改回原样，则移除脏标记
-
-        # 更新UI脏*显示
-        self.send_event(EVENT_MAIN_SETTINGS_MODEL_WORKING_STATE_CHANGED, changed_key=key)
+            # 取消UI脏*显示
+            self.send_event(EVENT_MAIN_SETTINGS_MODEL_FIELD_DIRTY_CANCELLED, key=key)
 
     def to_dict(self):
         return self.working_settings
@@ -60,8 +62,10 @@ class SettingsModel(Model):
         if not self.is_dirty():
             return
 
+        changed_settings = {key: self.working_settings[key] for key in self.dirty_fields}
+
         self.original_settings = copy.deepcopy(self.working_settings)
         self.dirty_fields.clear()
 
-        self.send_event(EVENT_MAIN_SETTINGS_MODEL_APPLIED, settings=self.original_settings)
-        self.send_event(EVENT_MAIN_SETTINGS_MODEL_WORKING_STATE_CHANGED)
+        self.send_event(EVENT_MAIN_SETTINGS_MODEL_APPLIED, settings=changed_settings)
+        # self.send_event(EVENT_MAIN_SETTINGS_MODEL_WORKING_STATE_CHANGED)

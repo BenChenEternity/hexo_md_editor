@@ -11,9 +11,11 @@ EVENT_MAIN_SETTINGS_UI_APPLY_CLICKED = "event.main.settings.ui.apply_clicked"
 # 语言
 EVENT_MAIN_SETTINGS_UI_LANGUAGE_SELECTED = "event.main.settings.ui.language_selected"  # kwargs: {'lang_code': 'en'}
 
-# 修改了某字段 kwargs: {'changed_key': key}
-EVENT_MAIN_SETTINGS_MODEL_WORKING_STATE_CHANGED = "event.main.settings.model.working_state_changed"
-# 应用按钮按下 kwargs: {"language": "en", ...}
+# 脏 field kwargs: {'key': key}
+EVENT_MAIN_SETTINGS_MODEL_FIELD_DIRTY = "event.main.settings.model.field_dirty"
+# 取消脏 field kwargs: {'key': key}
+EVENT_MAIN_SETTINGS_MODEL_FIELD_DIRTY_CANCELLED = "event.main.settings.model.field_dirty_cancelled"
+# 应用按钮按下 kwargs: {"settings": {...}} 只有更改的设置
 EVENT_MAIN_SETTINGS_MODEL_APPLIED = "event.main.settings.model.applied"
 
 # --- 定义 Main 模块的 UI 事件 ---
