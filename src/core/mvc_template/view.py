@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from tkinter import ttk
-from typing import Any, Dict, Optional
 
 from src.core.mvc_template.event_bus import Consumer, Producer
-
-from .model import Model
+from src.core.mvc_template.model import Model
 
 
 class View(ttk.Frame, Consumer, Producer, ABC):
@@ -16,17 +14,11 @@ class View(ttk.Frame, Consumer, Producer, ABC):
     """
 
     def __init__(self, master, model: Model):
-        """
-        构造函数。
-        :param model: 与此视图关联的模型实例。
-        """
-        # 依次安全地调用所有父类的构造函数
         ttk.Frame.__init__(self, master=master)
         Consumer.__init__(self)
         Producer.__init__(self)
 
         self.model = model
-        self.instance_info: Optional[Dict[str, Any]] = None
 
         # 定义一个标准化的UI创建流程
         self._create_widgets()

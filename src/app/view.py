@@ -10,12 +10,12 @@ from src.core.mvc_template.view import View as BaseView
 from ..utils.ui import UI
 from . import _
 from .constants import (
-    EVENT_MAIN_MODEL_LANGUAGE_CHANGED,
     EVENT_MAIN_UI_DEPLOY_CLICKED,
     EVENT_MAIN_UI_GENERATE_CLICKED,
     EVENT_MAIN_UI_INFO_CLICKED,
     EVENT_MAIN_UI_SETTINGS_CLICKED,
 )
+from .enum import MainKey
 from .model import MainModel
 
 
@@ -64,7 +64,8 @@ class MainView(BaseView):
         # 这里我们暂时不创建这个按钮，但保留这个逻辑
 
     def _setup_subscriptions(self):
-        self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
+        # self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
+        pass
 
     def on_language_changed(self, **kwargs):
         self.update_ui_texts()
@@ -75,7 +76,7 @@ class MainView(BaseView):
         self.deploy_button.config(text=_("Deploy"))
         # --- 同样使用 winfo_toplevel() 来设置标题 ---
         toplevel = self.winfo_toplevel()
-        toplevel.title(self.model.get_app_name())
+        toplevel.title(self.model.get_value(MainKey.APP_NAME.value))
 
     def _load_icons(self):
         self.TITLE_BAR_HEIGHT = 50

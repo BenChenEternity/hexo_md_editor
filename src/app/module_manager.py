@@ -1,8 +1,9 @@
 import logging
 import tkinter as tk
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
 from ..core.tree import TreeNode
+from ..services.factory import Factory
 from .constants import MODULE_ROOT, MODULE_ROOT_MAIN, MODULE_ROOT_MAIN_SETTINGS
 from .factory import MainFactory
 from .settings.factory import SettingsFactory
@@ -20,7 +21,7 @@ class ModuleManager:
     """
 
     def __init__(self, root_window: tk.Tk):
-        self._module_factories: Dict[str, Callable] = {}
+        self._module_factories: Dict[str, Factory] = {}
         self._activate_tree = None
         self._register_modules()
         # 根节点
@@ -41,6 +42,7 @@ class ModuleManager:
         """
         获取已经加载的模块 比如： MODULE_ROOT_MAIN_SETTINGS
         """
+        name = name.split(".", 1)[1]
         node = self._activate_tree.get_child(name)
         if node is None:
             return None
@@ -48,24 +50,23 @@ class ModuleManager:
 
     def _register_modules(self):
         """集中注册所有已知的模块及其工厂和呈现方式。"""
-        self.register(MODULE_ROOT_MAIN, MainFactory.create_module)
-        self.register(MODULE_ROOT_MAIN_SETTINGS, SettingsFactory.create_module)
-        # 示例：未来的 workspace 模块也将嵌入到父视图中
-        # self.register("workspace", workspace_factory.create_module, presentation="frame")
+        self.register(MODULE_ROOT_MAIN, MainFactory)
+        self.register(MODULE_ROOT_MAIN_SETTINGS, SettingsFactory)
 
-    def register(self, name: str, factory: Callable):
+    def register(self, name: str, factory: Type[Factory]) -> None:
         """
         注册一个模块。
         :param name: 模块的唯一名称。
-        :param factory: 创建模块MVC三元组的工厂函数。
+        :param factory: 创建模块MVC三元组的工厂类
         """
-        self._module_factories[name] = factory
+        self._module_factories[name] = factory(name, self)
 
-    def activate(self, name: str) -> Optional[ModuleInstanceInfo]:
+    def activate(self, name: str, model_data: dict) -> Optional[ModuleInstanceInfo]:
         """
         激活一个模块（按需加载）。
         如果模块已激活，则将其带到最前。
-        :param name: 要激活的模块名。
+        :param name: 要激活的模块名
+        :param model_data: 模型初始参数
         :return: 成功激活后返回模块的实例信息字典，否则返回 None。
         """
         logger.debug(f"Activating: ({name}).")
@@ -73,9 +74,9 @@ class ModuleManager:
         # 从root开始排除自身
         name = name.split(".", 1)[1]
 
-        module = self._module_factories.get(full_name, None)
-        # 未注册
-        if module is None:
+        factory = self._module_factories.get(full_name, None)
+        # 工厂未注册
+        if factory is None:
             logger.exception(f"Module: '{full_name}' not registered.")
             return
 
@@ -98,25 +99,30 @@ class ModuleManager:
         # 激活模块
         module_node = self._activate_tree.add_child(name)
         parent_module = module_node.parent
-        # 根组件
         if not parent_module:
-            pass
+            # 1.如果是根模块不需要手动激活 2.非根模块没有父节点
+            logger.exception(f"Module ('{full_name}') has no parent.")
+            return
 
-        context = {
-            **parent_module.data,
-            "module_manager": self,
-            "module_name": full_name,
-        }
+        parent_module_data = parent_module.data
+        if parent_module_data is None:
+            # 父节点数据缺失
+            logger.exception(f"Module ('{full_name}') has no parent data.")
+            return
 
-        factory = self._module_factories[full_name]
-        model, view, controller = factory(context)
+        parent_view = parent_module_data.get("view", None)
+        if parent_view is None:
+            # 父模块不能没视图
+            logger.exception(f"Module ('{full_name}') has no parent view.")
+            return
+
+        model, view, controller = factory.assemble(parent_view, model_data)
 
         # 添加到激活树
         instance_info = ModuleManager._create_node_data(model, view, controller)
         module_node.data = instance_info
 
         logger.debug(f"[DONE] Activated: ({full_name}).")
-        return instance_info
 
     def deactivate(self, name: str):
         """

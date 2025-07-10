@@ -7,11 +7,8 @@ logger = logging.getLogger(__name__)
 
 
 class SettingsManager:
-    def __init__(self):
-        self.settings_path: Path | None = None
-
-    def set_settings_path(self, settings_path: Path):
-        self.settings_path = settings_path
+    def __init__(self, path: Path):
+        self.settings_path = path
 
     def load_settings(self) -> Dict[str, Any]:
         if self.settings_path is None or not self.settings_path.exists():
@@ -42,6 +39,3 @@ class SettingsManager:
         current_settings = self.load_settings()
         current_settings[key] = value
         self.save_settings(current_settings)
-
-
-settings_manager = SettingsManager()

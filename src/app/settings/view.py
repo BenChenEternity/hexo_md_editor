@@ -2,23 +2,18 @@ import tkinter as tk
 from tkinter import ttk
 
 from settings import LANGUAGES
-from src.app.constants import (
-    EVENT_MAIN_MODEL_LANGUAGE_CHANGED,
-    EVENT_MAIN_SETTINGS_UI_LANGUAGE_SELECTED,
-)
-from src.core.mvc_template.model import Model as BaseModel
-from src.core.mvc_template.view import View as BaseView
+from src.app.constants import EVENT_MAIN_SETTINGS_UI_LANGUAGE_SELECTED
+from src.core.mvc_template.view import View
 
+from ..enum import MainKey
 from . import _
+from .model import SettingsModel
 
 
-class SettingsView(BaseView):
-    """
-    设置视图 (View 组件)。
-    完全遵循 BaseView 模板。
-    """
+class SettingsView(View):
+    model: SettingsModel
 
-    def __init__(self, master, model: BaseModel):
+    def __init__(self, master, model: SettingsModel):
         super().__init__(master, model)
 
     def _create_widgets(self):
@@ -29,7 +24,7 @@ class SettingsView(BaseView):
         self.lang_frame.grid_columnconfigure(1, weight=1)
         self.lang_label = ttk.Label(self.lang_frame, text=_("Language") + ":")
         self.lang_label.grid(row=0, column=0, sticky="w", padx=(0, 10))
-        lang_display_name = LANGUAGES.get(self.model.get_current_language(), "English")
+        lang_display_name = LANGUAGES.get(LANGUAGES[self.model.get_value(MainKey.LANGUAGE.value)], "English")
         self.lang_var = tk.StringVar(value=lang_display_name)
         self.lang_combo = ttk.Combobox(
             self.lang_frame,
@@ -44,7 +39,8 @@ class SettingsView(BaseView):
         self.lang_combo.bind("<<ComboboxSelected>>", self._on_language_selected)
 
     def _setup_subscriptions(self):
-        self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
+        # self.subscribe(EVENT_MAIN_MODEL_LANGUAGE_CHANGED, self.on_language_changed)
+        pass
 
     def _on_language_selected(self, event):
         selected_language_name = event.widget.get()
